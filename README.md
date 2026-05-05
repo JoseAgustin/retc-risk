@@ -22,7 +22,7 @@ Herramienta de procesamiento de datos del **Registro de Emisiones y Transferenci
 
 ## Descripción
 
-El script `process_retc_nl.py` automatiza el procesamiento de los archivos anuales del RETC (disponibles en [http://sinat.semarnat.gob.mx](http://sinat.semarnat.gob.mx/retc/retc/index.php))  para:
+El script `process_retc_nl.py` automatiza el procesamiento de los archivos anuales del RETC (disponibles en [gob.mx](https://www.gob.mx/semarnat/acciones-y-programas/retc)) para:
 
 1. Filtrar las emisiones al aire de empresas ubicadas en Nuevo León.
 2. Identificar los municipios de la Zona Metropolitana de Monterrey.
@@ -37,8 +37,8 @@ El script `process_retc_nl.py` automatiza el procesamiento de los archivos anual
 | Archivo | Descripción |
 |---|---|
 | `retc YYYY.xlsx` | Archivo anual del RETC. Debe contener las hojas **"Datos Generales"** y **"Emisiones y Transferencias"** con encabezados a partir de la fila 10. Puede haber uno o varios archivos por año. |
-| `contable.xlsx` | Tabla de referencia toxicológica con valores **IUR** (Inhalation Unit Risk) y **REL** (Reference Exposure Level) por número CAS (disponible en [ww2.arb.ca.gov/](https://ww2.arb.ca.gov/sites/default/files/classic/toxics/healthval/contable09252025.pdf)). |
-   
+| `contable.xlsx` | Tabla de referencia toxicológica con valores **IUR** (Inhalation Unit Risk) y **REL** (Reference Exposure Level) por número CAS. |
+
 ### Estructura esperada de `retc YYYY.xlsx`
 
 **Hoja: Datos Generales** (encabezados en fila 10)
@@ -65,7 +65,7 @@ El script `process_retc_nl.py` automatiza el procesamiento de los archivos anual
 
 ### Estructura esperada de `contable.xlsx`
 
-La tabla se encuentra originalmente en PDF y se convierte a excel, la que esta en este sitio tiene la ultima actualización de enero 2025. El script detecta automáticamente las columnas buscando palabras clave en los encabezados:
+El script detecta automáticamente las columnas buscando palabras clave en los encabezados:
 
 | Palabra clave buscada | Columna que representa |
 |---|---|
@@ -157,7 +157,7 @@ python3 process_retc_nl.py \
 
 ```
 /datos/retc/
-├── retc 2020.xlsx
+├── retc 2018.xlsx
 ├── retc 2021.xlsx
 ├── retc 2022.xlsx
 ├── retc 2023.xlsx
@@ -175,40 +175,52 @@ Cargando valores IUR y REL desde contable.xlsx...
     - IUR  : Inhalation Unit Risk
     - REL  : Chronic Inhalation REL
     - Nombre: Substance Name
-    Muestra: CAS=75-07-0, Nombre=ACETALDEHYDE, REL=140.0
-    Muestra: CAS=107-02-8, Nombre=ACROLEIN, REL=0.35
-    Muestra: CAS=107-13-1, Nombre=ACRYLONITRILE, REL=5.0
-    Muestra: CAS=7664-41-7, Nombre=AMMONIA, REL=200.0
-  Total de sustancias cargadas : 311
-  Con valores IUR              : 162
-  Con valores REL              : 175
+  Total de sustancias cargadas : 187
+  Con valores IUR              : 112
+  Con valores REL              : 134
   Factor de dilución DF1       : 2.47
   Factor de dilución DF2       : 0.25
 
 Archivos RETC encontrados: 4
 
-Procesando retc 2023.xlsx...
-  - Registros en Nuevo León    : 737
-  - Empresas únicas            : 391
-  - Sustancias tóxicas         : 39
-  - Sustancias con REL válido  : 23
-  ⚠  14 sustancias sin valor REL (puntaje no-cáncer = NaN):
-      - 7439-92-1
-1128
-[1130] (LEAD AND COMPOUNDSTAC, h
-(inorganic)
-values also apply to:)
-      - 124-38-9 (Bióxido de carbono)
-      - 7439-97-6 (Mercurio (polvos, respirables, vapores o humos))
-      - 7440-02-0 (Níquel (polvos, respirables, vapores o humos))
-      - 74-82-8 (Metano)
-      ... y 9 más
-✓ Resultados guardados en: /datos/retc/resultados/output_2023
+Procesando retc 2018.xlsx...
+  - Registros en Nuevo León    : 4320
+  - Empresas únicas            : 198
+  - Sustancias tóxicas         : 73
+  - Sustancias con REL válido  : 61
+  ⚠  12 sustancias sin valor REL (puntaje no-cáncer = NaN):
+      - 7664-41-7 (Ammonia)
+      ...
+  ✓ Resultados guardados en: /datos/retc/resultados/output_2018
 ```
 
 ---
 
 ## Metodología
+
+### Base metodológica
+
+Este script implementa el procedimiento de evaluación de riesgo por inhalación definido por la **California Air Resources Board (CARB)** en el programa **AB 2588 – Air Toxics Hot Spots**:
+
+> [https://ww2.arb.ca.gov/our-work/programs/ab-2588-air-toxics-hot-spots/hot-spots-risk-assessment](https://ww2.arb.ca.gov/our-work/programs/ab-2588-air-toxics-hot-spots/hot-spots-risk-assessment)
+
+El programa AB 2588 establece un marco para identificar fuentes de emisión de contaminantes tóxicos al aire, cuantificar el riesgo para la salud de la población cercana y priorizar acciones de reducción. Las ecuaciones de concentración y los factores de dilución utilizados en este script siguen las guías técnicas de dicho programa.
+
+### Tabla de valores toxicológicos (`contable.xlsx`)
+
+Los valores de IUR y REL provienen de la tabla de salud de referencia publicada por CARB:
+
+> **Health Values Table** – California Air Resources Board  
+> [https://ww2.arb.ca.gov/sites/default/files/classic/toxics/healthval/contable09252025.pdf](https://ww2.arb.ca.gov/sites/default/files/classic/toxics/healthval/contable09252025.pdf)
+
+Para preparar el archivo `contable.xlsx` a partir de ese PDF:
+
+1. Descarga el PDF desde el enlace anterior.
+2. Conviértelo a Excel (`.xlsx`) usando la herramienta de tu preferencia (Adobe Acrobat, LibreOffice, etc.).
+3. **Elimina los renglones de encabezado repetidos** que aparecen al inicio de cada página subsiguiente a la primera (son artefactos de la conversión del PDF paginado).
+4. Guarda el archivo resultante como `contable.xlsx` en el mismo directorio que los archivos RETC.
+
+> **Nota:** La tabla de CARB se actualiza periódicamente. Verifica la fecha del archivo PDF para asegurarte de usar la versión más reciente de los valores toxicológicos.
 
 ### Filtrado geográfico
 
@@ -273,7 +285,7 @@ retc-nuevo-leon/
 ├── README.md            # Este archivo
 └── data/                # (No incluida en el repo) – coloca aquí tus datos
     ├── contable.xlsx
-    ├── retc 2023.xlsx
+    ├── retc 2018.xlsx
     └── ...
 ```
 
@@ -296,7 +308,7 @@ retc-nuevo-leon/
 ## Preguntas frecuentes
 
 **¿Dónde descargo los archivos RETC?**
-En el portal de datos abiertos de SEMARNAT: [https://www.gob.mx/semarnat](https://www.gob.mx/semarnat) → sección RETC.
+En el portal de datos abiertos de SEMARNAT: [http://sinat.semarnat.gob.mx](http://sinat.semarnat.gob.mx/retc/retc/index.php)) → sección RETC.
 
 **¿Qué pasa si el archivo RETC tiene un formato diferente?**
 Verifica que las hojas se llamen exactamente `Datos Generales` y `Emisiones y Transferencias`, y que los encabezados inicien en la fila 10. Si el formato difiere, ajusta el parámetro `header` en `_load_retc_sheets()`.
@@ -306,6 +318,9 @@ Porque no tienen un valor REL definido en `contable.xlsx`. Esto puede deberse a 
 
 **¿Puedo usar otros estados además de Nuevo León?**
 Sí. Modifica la lista `NUEVO_LEON_PATTERNS` y la constante `MONTERREY_MUNICIPALITIES` en el script para adaptar el filtrado a otro estado o zona metropolitana.
+
+**¿Dónde descargo la tabla contable.pdf?**
+En el portal de California Air Resources Board  [ww2.arb.ca.gov/](https://ww2.arb.ca.gov/es/resources/documents/consolidated-table-oehha-carb-approved-risk-assessment-health-values)) → en la liga __Consolidated Table of OEHHA/ARB Approved Risk Assessment Health Values__.
 
 ---
 
