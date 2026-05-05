@@ -520,12 +520,13 @@ def _calculate_risk_scores(
             cancer_cols_dict[f'CANCER_SCORE_{cas}'] = 0.0
             noncancer_cols_dict[f'NONCANCER_SCORE_{cas}'] = 0.0
 
-    # Agregar columnas calculadas a los DataFrames
-    for col_name, col_data in cancer_cols_dict.items():
-        pivot[col_name] = col_data
+    # Agregar todas las columnas calculadas de una sola vez con pd.concat
+    # (evita PerformanceWarning por fragmentación al insertar columnas en loop)
+    cancer_new = pd.DataFrame(cancer_cols_dict, index=pivot.index)
+    pivot = pd.concat([pivot, cancer_new], axis=1)
 
-    for col_name, col_data in noncancer_cols_dict.items():
-        pivot_noncancer[col_name] = col_data
+    noncancer_new = pd.DataFrame(noncancer_cols_dict, index=pivot_noncancer.index)
+    pivot_noncancer = pd.concat([pivot_noncancer, noncancer_new], axis=1)
 
     # Totales de riesgo cancerígeno (Método 1 y 2)
     pivot['RISK_TOTAL'] = pivot[
