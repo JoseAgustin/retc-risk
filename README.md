@@ -127,8 +127,8 @@ pip install pandas openpyxl
 ### Clonar el repositorio
 
 ```bash
-git clone https://github.com/tu-usuario/retc-nuevo-leon.git
-cd retc-nuevo-leon
+git clone https://github.com/JoseAgustin/retc_risk.git
+cd retc-risk
 ```
 
 ---
