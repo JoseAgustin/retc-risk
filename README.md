@@ -22,7 +22,7 @@ Herramienta de procesamiento de datos del **Registro de Emisiones y Transferenci
 
 ## Descripción
 
-El script `process_retc_nl.py` automatiza el procesamiento de los archivos anuales del RETC (disponibles en [gob.mx](https://www.gob.mx/semarnat/acciones-y-programas/retc)) para:
+El script `process_retc_nl.py` automatiza el procesamiento de los archivos anuales del RETC (disponibles en [gob.mx](http://sinat.semarnat.gob.mx/retc/retc/index.php)) para:
 
 1. Filtrar las emisiones al aire de empresas ubicadas en Nuevo León.
 2. Identificar los municipios de la Zona Metropolitana de Monterrey.
